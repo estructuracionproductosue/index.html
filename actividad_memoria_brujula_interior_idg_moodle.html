@@ -1,0 +1,302 @@
+<style>
+  #idg-memory-game, #idg-memory-game * { box-sizing: border-box; }
+  #idg-memory-game {
+    --crema: #fffaf4;
+    --arena: #dcc29d;
+    --rosa: #eb9ab0;
+    --coral: #ee5949;
+    --naranja: #ff7e29;
+    --borgona: #7b283f;
+    --tinta: #33282a;
+    --linea: #e4d6c8;
+    max-width: 900px;
+    margin: 30px auto;
+    overflow: hidden;
+    color: var(--tinta);
+    background: var(--crema);
+    border: 1px solid #d9c2b5;
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(73, 35, 45, .13);
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  #idg-memory-game .idg-color-bar { display: flex; width: 100%; height: 8px; }
+  #idg-memory-game .idg-color-bar span { width: 20%; }
+  #idg-memory-game .idg-header { padding: 25px 24px 18px; text-align: center; }
+  #idg-memory-game .idg-kicker {
+    display: inline-block;
+    margin-bottom: 9px;
+    padding: 5px 11px;
+    color: #b5442c;
+    border: 1px solid var(--naranja);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+  }
+  #idg-memory-game h2 { margin: 0; color: var(--borgona); font-size: clamp(24px, 4vw, 32px); line-height: 1.18; }
+  #idg-memory-game .idg-subtitle { max-width: 610px; margin: 8px auto 0; color: #66595b; font-size: 15px; line-height: 1.5; }
+  #idg-memory-game .idg-rule { width: 54px; height: 4px; margin: 13px auto 0; background: var(--naranja); border-radius: 4px; }
+  #idg-memory-game .idg-dashboard {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0 22px 14px;
+  }
+  #idg-memory-game .idg-stat {
+    padding: 11px 10px;
+    text-align: center;
+    background: rgba(255,255,255,.42);
+    border: 1px solid var(--linea);
+    border-radius: 12px;
+  }
+  #idg-memory-game .idg-stat-label { display: block; margin-bottom: 3px; color: #75666a; font-size: 11px; font-weight: 800; letter-spacing: .65px; text-transform: uppercase; }
+  #idg-memory-game .idg-stat-value { color: var(--borgona); font-size: 20px; font-weight: 800; }
+  #idg-memory-game .idg-progress-wrap { margin: 0 22px 17px; }
+  #idg-memory-game .idg-progress-text { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 6px; color: #66595b; font-size: 12px; font-weight: 700; }
+  #idg-memory-game .idg-progress { height: 8px; overflow: hidden; background: #eee2d8; border-radius: 999px; }
+  #idg-memory-game .idg-progress-bar { width: 0; height: 100%; background: linear-gradient(90deg, var(--rosa), var(--coral), var(--naranja)); border-radius: inherit; transition: width .35s ease; }
+  #idg-memory-game .idg-board {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    padding: 0 22px 20px;
+  }
+  #idg-memory-game .idg-card {
+    position: relative;
+    min-width: 0;
+    aspect-ratio: 1.28 / 1;
+    padding: 0;
+    appearance: none;
+    background: transparent;
+    border: 0;
+    border-radius: 13px;
+    cursor: pointer;
+    perspective: 900px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #idg-memory-game .idg-card:focus-visible { outline: 3px solid rgba(255,126,41,.42); outline-offset: 3px; }
+  #idg-memory-game .idg-card-inner {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 5px 13px rgba(73,35,45,.12);
+    transform-style: preserve-3d;
+    transition: transform .42s cubic-bezier(.2,.7,.2,1), box-shadow .2s ease;
+  }
+  #idg-memory-game .idg-card:hover .idg-card-inner { box-shadow: 0 8px 18px rgba(73,35,45,.18); }
+  #idg-memory-game .idg-card.is-open .idg-card-inner,
+  #idg-memory-game .idg-card.is-matched .idg-card-inner { transform: rotateY(180deg); }
+  #idg-memory-game .idg-face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    overflow-wrap: anywhere;
+    border: 1px solid rgba(123,40,63,.15);
+    border-radius: inherit;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  #idg-memory-game .idg-front { color: var(--borgona); background: linear-gradient(145deg, #fff7ef, #f3e0d2); font-size: 25px; font-weight: 800; }
+  #idg-memory-game .idg-front::after { content: ''; position: absolute; inset: 7px; border: 1px solid rgba(123,40,63,.12); border-radius: 9px; }
+  #idg-memory-game .idg-back { color: var(--borgona); background: #fff; font-size: clamp(12px, 1.8vw, 16px); font-weight: 800; line-height: 1.25; text-align: center; transform: rotateY(180deg); }
+  #idg-memory-game .idg-card.is-matched .idg-back { color: #fff; background: var(--borgona) !important; border-color: var(--borgona); }
+  #idg-memory-game .idg-card.is-matched .idg-back::after { content: '\2713'; position: absolute; top: 6px; right: 8px; font-size: 12px; }
+  #idg-memory-game .idg-feedback { min-height: 46px; margin: 0 22px 8px; padding: 11px 14px; color: #66595b; background: #fff7ef; border: 1px solid var(--linea); border-radius: 11px; font-size: 14px; font-weight: 700; line-height: 1.45; text-align: center; }
+  #idg-memory-game .idg-feedback.success { color: var(--borgona); border-color: var(--rosa); }
+  #idg-memory-game .idg-actions { padding: 4px 22px 24px; text-align: center; }
+  #idg-memory-game .idg-reset {
+    min-height: 44px;
+    padding: 10px 19px;
+    color: #fff;
+    background: var(--borgona);
+    border: 2px solid var(--borgona);
+    border-radius: 999px;
+    box-shadow: 0 5px 12px rgba(123,40,63,.18);
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+  }
+  #idg-memory-game .idg-reset:hover { background: #682035; box-shadow: 0 7px 15px rgba(123,40,63,.23); transform: translateY(-1px); }
+  #idg-memory-game .idg-reset:focus-visible { outline: 3px solid rgba(255,126,41,.42); outline-offset: 3px; }
+  @media (max-width: 620px) {
+    #idg-memory-game { margin: 16px auto; border-radius: 14px; }
+    #idg-memory-game .idg-header { padding: 21px 17px 16px; }
+    #idg-memory-game .idg-dashboard { margin-inline: 14px; gap: 7px; }
+    #idg-memory-game .idg-stat { padding: 9px 5px; }
+    #idg-memory-game .idg-stat-value { font-size: 18px; }
+    #idg-memory-game .idg-progress-wrap { margin-inline: 14px; }
+    #idg-memory-game .idg-board { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; padding: 0 14px 17px; }
+    #idg-memory-game .idg-card { aspect-ratio: 1.55 / 1; }
+    #idg-memory-game .idg-back { font-size: 14px; }
+    #idg-memory-game .idg-feedback { margin-inline: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #idg-memory-game *, #idg-memory-game *::before, #idg-memory-game *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+</style>
+
+<section id="idg-memory-game" aria-labelledby="idg-game-title">
+  <div class="idg-color-bar" aria-hidden="true">
+    <span style="background:#dcc29d;"></span><span style="background:#eb9ab0;"></span><span style="background:#ee5949;"></span><span style="background:#ff7e29;"></span><span style="background:#7b283f;"></span>
+  </div>
+
+  <header class="idg-header">
+    <div class="idg-kicker">Actividad interactiva</div>
+    <h2 id="idg-game-title">Pon a prueba tu memoria</h2>
+    <p class="idg-subtitle">Encuentra las ocho parejas y conecta los conceptos de tu br&uacute;jula interior. Selecciona dos cartas en cada turno.</p>
+    <div class="idg-rule" aria-hidden="true"></div>
+  </header>
+
+  <div class="idg-dashboard" aria-label="Resultados de la partida">
+    <div class="idg-stat"><span class="idg-stat-label">Intentos</span><span class="idg-stat-value" data-stat="attempts">0</span></div>
+    <div class="idg-stat"><span class="idg-stat-label">Parejas</span><span class="idg-stat-value"><span data-stat="pairs">0</span>/8</span></div>
+    <div class="idg-stat"><span class="idg-stat-label">Puntaje</span><span class="idg-stat-value" data-stat="score">0</span></div>
+  </div>
+
+  <div class="idg-progress-wrap">
+    <div class="idg-progress-text"><span>Progreso</span><span data-stat="progressText">0%</span></div>
+    <div class="idg-progress" role="progressbar" aria-label="Progreso del juego" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0"><div class="idg-progress-bar"></div></div>
+  </div>
+
+  <div class="idg-board" role="group" aria-label="Tablero de memoria"></div>
+  <div class="idg-feedback" aria-live="polite">Elige una carta para comenzar.</div>
+  <div class="idg-actions"><button class="idg-reset" type="button">&#8635;&nbsp; Reiniciar actividad</button></div>
+</section>
+
+<script>
+(function () {
+  const root = document.getElementById('idg-memory-game');
+  if (!root || root.dataset.ready === 'true') return;
+  root.dataset.ready = 'true';
+
+  const concepts = ['Propósito', 'Compasión', 'Conciencia', 'Servicio', 'Interior', 'Espíritu', 'Sentido', 'Ser'];
+  const accents = ['#dcc29d', '#eb9ab0', '#ee5949', '#ff7e29', '#d9b2a1', '#f0b9aa', '#e7c58d', '#cfa2af'];
+  const board = root.querySelector('.idg-board');
+  const feedback = root.querySelector('.idg-feedback');
+  const progress = root.querySelector('.idg-progress');
+  const progressBar = root.querySelector('.idg-progress-bar');
+  const attemptsEl = root.querySelector('[data-stat="attempts"]');
+  const pairsEl = root.querySelector('[data-stat="pairs"]');
+  const scoreEl = root.querySelector('[data-stat="score"]');
+  const progressText = root.querySelector('[data-stat="progressText"]');
+  let openCards = [];
+  let locked = false;
+  let attempts = 0;
+  let pairs = 0;
+  let score = 0;
+
+  function shuffle(items) {
+    const copy = items.slice();
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function setFeedback(message, success) {
+    feedback.textContent = message;
+    feedback.classList.toggle('success', Boolean(success));
+  }
+
+  function updateStats() {
+    const percent = Math.round((pairs / concepts.length) * 100);
+    attemptsEl.textContent = attempts;
+    pairsEl.textContent = pairs;
+    scoreEl.textContent = score;
+    progressText.textContent = percent + '%';
+    progressBar.style.width = percent + '%';
+    progress.setAttribute('aria-valuenow', String(pairs));
+  }
+
+  function makeCard(item, index) {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'idg-card';
+    card.dataset.value = item.value;
+    card.dataset.pair = String(item.pair);
+    card.setAttribute('aria-label', 'Carta ' + (index + 1) + ' oculta');
+    card.setAttribute('aria-pressed', 'false');
+    card.innerHTML = '<span class="idg-card-inner"><span class="idg-face idg-front" aria-hidden="true">?</span><span class="idg-face idg-back" style="background:' + item.color + ';">' + item.value + '</span></span>';
+    card.addEventListener('click', function () { selectCard(card); });
+    return card;
+  }
+
+  function selectCard(card) {
+    if (locked || card.classList.contains('is-open') || card.classList.contains('is-matched')) return;
+    card.classList.add('is-open');
+    card.setAttribute('aria-pressed', 'true');
+    card.setAttribute('aria-label', 'Carta: ' + card.dataset.value);
+    openCards.push(card);
+
+    if (openCards.length === 1) {
+      setFeedback('Ahora selecciona una segunda carta.', false);
+      return;
+    }
+
+    locked = true;
+    attempts += 1;
+    const [first, second] = openCards;
+    const isMatch = first.dataset.pair === second.dataset.pair;
+
+    window.setTimeout(function () {
+      if (isMatch) {
+        first.classList.remove('is-open');
+        second.classList.remove('is-open');
+        first.classList.add('is-matched');
+        second.classList.add('is-matched');
+        first.disabled = true;
+        second.disabled = true;
+        first.setAttribute('aria-label', 'Pareja encontrada: ' + first.dataset.value);
+        second.setAttribute('aria-label', 'Pareja encontrada: ' + second.dataset.value);
+        pairs += 1;
+        score += 10;
+        setFeedback('¡Muy bien! Conectaste “' + first.dataset.value + '”.', true);
+      } else {
+        first.classList.remove('is-open');
+        second.classList.remove('is-open');
+        first.setAttribute('aria-pressed', 'false');
+        second.setAttribute('aria-pressed', 'false');
+        first.setAttribute('aria-label', 'Carta oculta');
+        second.setAttribute('aria-label', 'Carta oculta');
+        score = Math.max(0, score - 2);
+        setFeedback('Aún no coinciden. Observa, recuerda y vuelve a intentarlo.', false);
+      }
+
+      openCards = [];
+      locked = false;
+      updateStats();
+
+      if (pairs === concepts.length) {
+        setFeedback('¡Reto completado! Has conectado completamente tu brújula interior en ' + attempts + ' intentos.', true);
+      }
+    }, 720);
+  }
+
+  function resetGame() {
+    openCards = [];
+    locked = false;
+    attempts = 0;
+    pairs = 0;
+    score = 0;
+    board.innerHTML = '';
+    const deck = shuffle(concepts.flatMap(function (value, pair) {
+      return [
+        { value: value, pair: pair, color: accents[pair] },
+        { value: value, pair: pair, color: accents[pair] }
+      ];
+    }));
+    deck.forEach(function (item, index) { board.appendChild(makeCard(item, index)); });
+    updateStats();
+    setFeedback('Elige una carta para comenzar.', false);
+  }
+
+  root.querySelector('.idg-reset').addEventListener('click', resetGame);
+  resetGame();
+}());
+</script>
