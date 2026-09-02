@@ -60,14 +60,14 @@
   #idg-memory-game .idg-progress-bar { width: 0; height: 100%; background: linear-gradient(90deg, var(--rosa), var(--coral), var(--naranja)); border-radius: inherit; transition: width .35s ease; }
   #idg-memory-game .idg-board {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 9px;
     padding: 0 22px 14px;
   }
   #idg-memory-game .idg-card {
     position: relative;
     min-width: 0;
-    aspect-ratio: 1.28 / 1;
+    aspect-ratio: 1 / 1;
     padding: 0;
     appearance: none;
     background: transparent;
@@ -104,7 +104,7 @@
   }
   #idg-memory-game .idg-front { color: var(--borgona); background: linear-gradient(145deg, #fff7ef, #f3e0d2); font-size: 25px; font-weight: 800; }
   #idg-memory-game .idg-front::after { content: ''; position: absolute; inset: 7px; border: 1px solid rgba(123,40,63,.12); border-radius: 9px; }
-  #idg-memory-game .idg-back { color: var(--borgona); background: #fff; font-size: clamp(12px, 1.8vw, 16px); font-weight: 800; line-height: 1.25; text-align: center; transform: rotateY(180deg); }
+  #idg-memory-game .idg-back { color: var(--borgona); background: #fff; font-size: clamp(11px, 1.2vw, 14px); font-weight: 800; line-height: 1.2; text-align: center; transform: rotateY(180deg); }
   #idg-memory-game .idg-card.is-matched .idg-back { color: #fff; background: var(--borgona) !important; border-color: var(--borgona); }
   #idg-memory-game .idg-card.is-matched .idg-back::after { content: '\2713'; position: absolute; top: 6px; right: 8px; font-size: 12px; }
   #idg-memory-game .idg-feedback { min-height: 46px; margin: 0 22px 8px; padding: 11px 14px; color: #66595b; background: #fff7ef; border: 1px solid var(--linea); border-radius: 11px; font-size: 14px; font-weight: 700; line-height: 1.45; text-align: center; }
